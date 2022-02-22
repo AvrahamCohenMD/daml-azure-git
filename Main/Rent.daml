@@ -1,0 +1,53 @@
+module Main.Rent where
+
+data EmployeeDetails = EmployeeDetails
+  with  
+    id: Int
+    name: Text
+    dept: Text
+
+template RentAgreement
+  with
+    landlord : Party
+    tenant: Party
+    terms: Text  
+  where
+    signatory landlord, tenant
+
+    controller landlord can
+      RevokeAgreement: ()
+        do
+          return ( )
+
+
+template RentProposal
+  with 
+    landlord: Party
+    tenant: Party
+    terms: Text
+  where
+    signatory landlord
+
+    controller tenant can
+      AcceptProposal: ContractId RentAgreement
+        do
+          create RentAgreement with ..
+      RejectProposal: ContractId RentRejection
+        with  
+          rejectReason: Text
+        do  
+          create RentRejection with landlord, tenant, terms, rejectReason
+
+    controller landlord can
+      RevokeProposal: ()
+        do
+          return ()
+
+template RentRejection 
+  with
+    landlord: Party
+    tenant: Party
+    terms: Text
+    rejectReason: Text
+  where
+    signatory tenant, landlord 
